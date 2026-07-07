@@ -35,10 +35,9 @@
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 typedef enum { 
-    SCREEN_LOGO = 0, 
-    SCREEN_TITLE, 
+    SCREEN_LOGO, 
     SCREEN_GAMEPLAY, 
-    SCREEN_ENDING
+    SCREEN_EXIT
 } GameScreen;
 
 // TODO: Define your custom data types here
@@ -48,6 +47,7 @@ typedef enum {
 //----------------------------------------------------------------------------------
 static const int screenWidth = 720;
 static const int screenHeight = 720;
+static GameScreen currentScreen;
 
 static RenderTexture2D target = { 0 };  // Render texture to render our game
 static int frameCounter = 0;
@@ -59,6 +59,9 @@ static int frameCounter = 0;
 //----------------------------------------------------------------------------------
 static void UpdateDrawFrame(void);      // Update and Draw one frame
 
+static void DrawMenu(void);
+
+static void DrawGame(void);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -70,10 +73,14 @@ int main(void)
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib gamejam template");
+    InitWindow(screenWidth, screenHeight, "Hexcore Operator");
+
+    SetExitKey(KEY_Q);
+    currentScreen = SCREEN_LOGO;
     
     // TODO: Load resources / Initialize variables at this point
     
+    // Dsiable cus i don't think i'll scale.
     // Render texture to draw, enables screen scaling
     // NOTE: If screen is scaled, mouse input should be scaled proportionally
     target = LoadRenderTexture(screenWidth, screenHeight);
@@ -85,9 +92,19 @@ int main(void)
     SetTargetFPS(60);     // Set our game frames-per-second
     //--------------------------------------------------------------------------------------
 
+
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button
+    while (!WindowShouldClose() && currentScreen != SCREEN_EXIT)    // Detect window close button
     {
+        switch (currentScreen) {
+        case SCREEN_LOGO:
+            if (IsKeyPressed(KEY_ENTER)) currentScreen = SCREEN_GAMEPLAY;
+            break;
+        case SCREEN_GAMEPLAY:
+            currentScreen = SCREEN_GAMEPLAY;
+            if (IsKeyPressed(KEY_Q)) currentScreen = SCREEN_EXIT;
+            break;
+        }
         UpdateDrawFrame();
     }
 #endif
@@ -95,7 +112,7 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadRenderTexture(target);
-    
+
     // TODO: Unload all loaded resources at this point
 
     CloseWindow();        // Close window and OpenGL context
@@ -119,29 +136,21 @@ void UpdateDrawFrame(void)
 
     // Draw
     //----------------------------------------------------------------------------------
-    // Render game screen to a texture, 
-    // it could be useful for scaling or further shader postprocessing
-    BeginTextureMode(target);
-        ClearBackground(RAYWHITE);
-        
-        // TODO: Draw your game screen here
-
-        DrawRectangle(70, 90, 200, 200, BLACK);
-        DrawRectangle(70 + 16, 90 + 16, 200 - 32, 200 - 32, RAYWHITE);
-        DrawText("raylib", 70 + 200 - MeasureText("raylib", 40) - 32, 90 + 200 - 40 - 24, 40, BLACK);
-
-        DrawText("6.x", 290, 90 - 26, 280, BLACK);
-        DrawText("GAMEJAM", 70, 90 + 210, 120, MAROON);
-
-        if ((frameCounter/20)%2) DrawText("are you ready?", 160, 500, 50, BLACK);
-        
-        DrawRectangleLinesEx((Rectangle){ 0, 0, screenWidth, screenHeight }, 16, BLACK);
-        
-    EndTextureMode();
     
     // Render to screen (main framebuffer)
     BeginDrawing();
-        ClearBackground(RAYWHITE);
+    // Render game screen to a texture, 
+    // it could be useful for scaling or further shader postprocessing
+    BeginTextureMode(target);
+        switch (currentScreen) {
+        case SCREEN_LOGO:
+            DrawMenu();
+            break;
+        case SCREEN_GAMEPLAY:
+            DrawGame();
+            break;
+        }
+    EndTextureMode();
         
         // Draw render texture to screen, scaled if required
         DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, -(float)target.texture.height }, 
@@ -151,4 +160,23 @@ void UpdateDrawFrame(void)
 
     EndDrawing();
     //----------------------------------------------------------------------------------  
+}
+
+void DrawMenu(void) {
+    ClearBackground(WHITE); // thank you @mapleredleaf99 for the fix
+    printf("Drawing Menu\n");
+    DrawText("Hexcore Operator", 70, 90 + 210, 60, MAROON);
+    DrawText("a game by Blaise!", 460, 140 + 210, 20, BLACK);
+
+    if ((frameCounter / 20) % 5) DrawText("ENTER TO START GAME", 40, 500, 50, BLACK);
+    DrawText("Q TO QUIT GAME", 180, 550, 40, RED);
+
+    DrawRectangleLinesEx((Rectangle) { 0, 0, screenWidth, screenHeight }, 16, BLACK);
+
+}
+void DrawGame(void) {
+    ClearBackground(RAYWHITE);
+    printf("Drawing Game\n");
+    DrawText("GAME", 400, 400, 50, RED);
+    DrawRectangleLinesEx((Rectangle) { 0, 0, screenWidth, screenHeight }, 16, BLACK);
 }
