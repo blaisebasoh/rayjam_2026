@@ -103,14 +103,14 @@ int main(void)
 	{
 		switch (currentScreen) {
 		case SCREEN_LOGO:
-			if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
+			if (IsKeyPressed(KEY_ENTER))
 			{
 				currentScreen = SCREEN_GAMEPLAY;
 			}
 			break;
 		case SCREEN_GAMEPLAY:
 			currentScreen = SCREEN_GAMEPLAY;
-			if (IsKeyPressed(KEY_Q) || IsGestureDetected(GESTURE_TAP)) currentScreen = SCREEN_EXIT;
+			if (IsKeyPressed(KEY_Q)) currentScreen = SCREEN_EXIT;
 			break;
 		}
 		UpdateDrawFrame();
